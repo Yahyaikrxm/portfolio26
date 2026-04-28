@@ -3,15 +3,34 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import Draggable from "gsap/Draggable";
+import ScrollTrigger from "gsap/ScrollTrigger";
 import { motion } from "motion/react";
 
 const essentials = [
-  "Notebook",
-  "Match Day",
-  "Studio",
-  "Playlist",
-  "Camera Roll",
-  "Archive",
+  {
+    label: "Notebook",
+    description: "Loose sketches, project notes, and the first version of ideas before they turn real.",
+  },
+  {
+    label: "Match Day",
+    description: "The soccer rhythm: pressure, teamwork, and the energy that keeps Footy4Hope moving.",
+  },
+  {
+    label: "Studio",
+    description: "A small workspace for design experiments, code sessions, and visual direction.",
+  },
+  {
+    label: "Playlist",
+    description: "The background layer for long builds, late edits, and staying locked in.",
+  },
+  {
+    label: "Camera Roll",
+    description: "Snapshots, references, and moments that shape the feeling of the collage.",
+  },
+  {
+    label: "Archive",
+    description: "Old versions, saved fragments, and proof that every polished thing had drafts.",
+  },
 ];
 
 const tags = [
@@ -65,9 +84,11 @@ export default function Home() {
   const tileRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   useEffect(() => {
-    gsap.registerPlugin(Draggable);
+    gsap.registerPlugin(Draggable, ScrollTrigger);
 
     const ctx = gsap.context(() => {
+      const navLinks = gsap.utils.toArray<HTMLElement>(".portfolio-nav a");
+
       gsap.set(".reveal", {
         autoAlpha: 0,
         y: 20,
@@ -75,6 +96,56 @@ export default function Home() {
       });
       gsap.set(".section-rule", { scaleX: 0, transformOrigin: "left center" });
       gsap.set(navPillRef.current, { autoAlpha: 0, scale: 0.92 });
+      gsap.set(navRef.current, {
+        autoAlpha: 0,
+        width: 36,
+        pointerEvents: "none",
+      });
+      gsap.set(navLinks, { autoAlpha: 0, y: -2 });
+
+      const navRevealTimeline = gsap
+        .timeline({
+          paused: true,
+          defaults: { ease: "power3.out" },
+          onStart: () => {
+            gsap.set(navRef.current, { pointerEvents: "none" });
+          },
+          onComplete: () => {
+            gsap.set(navRef.current, { pointerEvents: "auto" });
+          },
+          onReverseComplete: () => {
+            gsap.set(navRef.current, { pointerEvents: "none" });
+            gsap.set(navPillRef.current, { autoAlpha: 0, scale: 0.92 });
+          },
+        })
+        .to(navRef.current, {
+          autoAlpha: 1,
+          duration: 0.1,
+          ease: "none",
+        })
+        .to(navRef.current, {
+          width: () => Math.min(window.innerWidth - 48, 812),
+          duration: 0.42,
+          ease: "expo.out",
+        })
+        .to(
+          navLinks,
+          {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.18,
+            stagger: 0.035,
+            ease: "power2.out",
+          },
+          "-=0.16",
+        );
+
+      ScrollTrigger.create({
+        trigger: pageRef.current,
+        start: "top -90px",
+        onEnter: () => navRevealTimeline.play(),
+        onLeaveBack: () => navRevealTimeline.reverse(),
+      });
 
       gsap
         .timeline({ defaults: { ease: "power3.out" } })
@@ -96,6 +167,25 @@ export default function Home() {
         );
 
       const cards = tileRefs.current.filter(Boolean) as HTMLDivElement[];
+      let activeCardZ = 9001;
+      const liftCard = (card: HTMLDivElement) => {
+        activeCardZ = Math.min(activeCardZ + 1, 9900);
+        gsap.set(card, { zIndex: activeCardZ });
+      };
+      const hoverCard = (event: MouseEvent) => {
+        const card = event.currentTarget as HTMLDivElement;
+
+        liftCard(card);
+      };
+      const pressCard = (event: MouseEvent) => {
+        liftCard(event.currentTarget as HTMLDivElement);
+      };
+
+      cards.forEach((card) => {
+        card.addEventListener("mousedown", pressCard);
+        card.addEventListener("mouseenter", hoverCard);
+      });
+
       Draggable.create(cards, {
         type: "x,y",
         bounds: pageRef.current,
@@ -104,7 +194,17 @@ export default function Home() {
         cursor: "grab",
         activeCursor: "grabbing",
         zIndexBoost: false,
+        onPress() {
+          liftCard(this.target as HTMLDivElement);
+        },
       });
+
+      return () => {
+        cards.forEach((card) => {
+          card.removeEventListener("mousedown", pressCard);
+          card.removeEventListener("mouseenter", hoverCard);
+        });
+      };
     }, pageRef);
 
     return () => ctx.revert();
@@ -214,7 +314,7 @@ export default function Home() {
                 tileRefs.current[index] = node;
               }}
               className={`essential-card essential-card-${index + 1}`}
-              key={item}
+              key={item.label}
             >
               <motion.div
                 className="essential-card-inner"
@@ -222,8 +322,9 @@ export default function Home() {
                 whileTap={{ scale: 0.985 }}
                 transition={{ type: "spring", stiffness: 340, damping: 26 }}
               >
-                <span>{item}</span>
+                <span>{item.label}</span>
               </motion.div>
+              <p className="essential-card-tooltip">{item.description}</p>
             </div>
           ))}
         </div>

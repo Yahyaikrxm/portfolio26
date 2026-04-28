@@ -36,41 +36,6 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-body::after {
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 7000;
-  height: clamp(360px, 62vh, 760px);
-  pointer-events: none;
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0) 0%,
-    rgba(0, 0, 0, 0.08) 18%,
-    rgba(0, 0, 0, 0.28) 46%,
-    rgba(0, 0, 0, 0.52) 74%,
-    rgba(0, 0, 0, 0.68) 100%
-  );
-  -webkit-backdrop-filter: blur(34px) saturate(0.9);
-  backdrop-filter: blur(34px) saturate(0.9);
-  mask-image: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(0, 0, 0, 0.18) 24%,
-    rgba(0, 0, 0, 0.62) 56%,
-    black 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(0, 0, 0, 0.18) 24%,
-    rgba(0, 0, 0, 0.62) 56%,
-    black 100%
-  );
-  content: "";
-}
-
 a {
   color: inherit;
   text-decoration: none;
@@ -88,13 +53,14 @@ a {
 }
 
 .portfolio-nav {
-  position: sticky;
-  top: 14px;
+  position: fixed;
+  top: 16px;
+  left: 50%;
   z-index: 10000;
   display: flex;
   justify-content: center;
   gap: 6px;
-  width: 100%;
+  width: 36px;
   min-height: 36px;
   padding: 4px;
   overflow: hidden;
@@ -106,9 +72,13 @@ a {
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
     0 18px 48px rgba(0, 0, 0, 0.24),
     0 0 26px rgba(255, 255, 255, 0.035);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
   text-transform: uppercase;
-  animation: nav-settle 700ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
+  transform: translateX(-50%);
   backdrop-filter: blur(18px);
+  will-change: width, opacity, visibility;
 }
 
 .portfolio-nav a {
@@ -176,14 +146,11 @@ a {
   will-change: transform;
 }
 
-.roll-text-hover .roll-track {
-  transition: transform 380ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
 .roll-text-hover:hover .roll-track,
 a:hover .roll-text-hover .roll-track,
 a:focus-visible .roll-text-hover .roll-track {
   transform: translateY(-50%);
+  transition: transform 560ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .roll-track span {
@@ -193,7 +160,7 @@ a:focus-visible .roll-text-hover .roll-track {
 }
 
 .hero-section {
-  padding-top: clamp(22px, 3.6vw, 48px);
+  padding-top: clamp(88px, 10vw, 142px);
 }
 
 .hero-grid {
@@ -258,11 +225,12 @@ a:focus-visible .roll-text-hover .roll-track {
 }
 
 .content-section {
-  padding-top: 24px;
+  padding-top: 54px;
 }
 
 .essentials-section {
-  min-height: 150px;
+  position: relative;
+  min-height: 190px;
 }
 
 .section-heading h2 {
@@ -297,6 +265,36 @@ a:focus-visible .roll-text-hover .roll-track {
   height: 72px;
   user-select: none;
   will-change: transform;
+}
+
+.essential-card-tooltip {
+  display: none;
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  z-index: 4;
+  width: 220px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 7px;
+  background: rgba(18, 18, 18, 0.94);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 16px 34px rgba(0, 0, 0, 0.36);
+  color: #dddddd;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.28;
+  pointer-events: none;
+  text-align: center;
+  transform: translateX(-50%) translateY(0) scale(1);
+  transform-origin: center top;
+}
+
+.essential-card:hover .essential-card-tooltip {
+  display: block;
 }
 
 .essential-card-1 {
@@ -353,7 +351,7 @@ a:focus-visible .roll-text-hover .roll-track {
 }
 
 .project-section {
-  padding-top: 32px;
+  padding-top: 74px;
 }
 
 .project-card {
@@ -573,7 +571,7 @@ a:focus-visible .roll-text-hover .roll-track {
   }
 
   .hero-section {
-    padding-top: 42px;
+    padding-top: 96px;
   }
 
   .hero-title {

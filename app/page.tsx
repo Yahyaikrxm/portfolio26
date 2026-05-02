@@ -134,6 +134,8 @@ export default function Home() {
         ".project-section .reveal, .site-footer.reveal",
       );
       const sectionRules = gsap.utils.toArray<HTMLElement>(".section-rule");
+      const scrollIndicator = document.querySelector<HTMLElement>(".scroll-indicator");
+      const scrollIndicatorDot = document.querySelector<HTMLElement>(".scroll-indicator-dot");
 
       const syncProjectSpacing = () => {
         const heroGroup = heroGroupRef.current;
@@ -171,6 +173,7 @@ export default function Home() {
         filter: "blur(6px)",
       });
       gsap.set(sectionRules, { scaleX: 0, transformOrigin: "left center" });
+      gsap.set(scrollIndicator, { autoAlpha: 0, y: 8 });
       gsap.set(navPillRef.current, { autoAlpha: 0, scale: 0.92 });
       gsap.set(navRef.current, {
         autoAlpha: 0,
@@ -241,6 +244,45 @@ export default function Home() {
 
       window.addEventListener("resize", syncLayout);
 
+      const scrollIndicatorTween = gsap.fromTo(
+        scrollIndicatorDot,
+        { y: 0, autoAlpha: 0.55, scale: 0.92 },
+        {
+          y: 22,
+          autoAlpha: 1,
+          scale: 1,
+          duration: 1.35,
+          ease: "power2.inOut",
+          repeat: -1,
+          yoyo: true,
+        },
+      );
+      let scrollIndicatorRevealDelay: gsap.core.Tween | null = null;
+
+      const hideScrollIndicator = () => {
+        scrollIndicatorRevealDelay?.kill();
+        scrollIndicatorRevealDelay = null;
+        scrollIndicatorTween.pause();
+        gsap.to(scrollIndicator, {
+          autoAlpha: 0,
+          y: 10,
+          duration: 0.22,
+          ease: "power2.out",
+          overwrite: true,
+        });
+      };
+
+      const showScrollIndicator = () => {
+        scrollIndicatorTween.play();
+        gsap.to(scrollIndicator, {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.48,
+          ease: "power2.out",
+          overwrite: true,
+        });
+      };
+
       gsap
         .timeline({ defaults: { ease: "power3.out" } })
         .to(heroReveals, {
@@ -267,6 +309,20 @@ export default function Home() {
         .call(() => {
           syncProjectSpacing();
           ScrollTrigger.refresh();
+        })
+        .to(
+          scrollIndicator,
+          {
+            autoAlpha: window.scrollY > 8 ? 0 : 1,
+            y: 0,
+            duration: 0.45,
+          },
+          "-=0.2",
+        )
+        .call(() => {
+          if (window.scrollY > 8) {
+            scrollIndicatorTween.pause(0);
+          }
         });
 
       const belowFoldTimeline = gsap.timeline({
@@ -294,6 +350,7 @@ export default function Home() {
 
       const syncBelowFoldVisibility = () => {
         if (window.scrollY > 8) {
+          hideScrollIndicator();
           belowFoldTimeline.timeScale(1);
           belowFoldTimeline.play();
           return;
@@ -301,6 +358,8 @@ export default function Home() {
 
         belowFoldTimeline.timeScale(1.6).reverse();
         navRevealTimeline.reverse();
+        scrollIndicatorRevealDelay?.kill();
+        scrollIndicatorRevealDelay = gsap.delayedCall(0.62, showScrollIndicator);
       };
 
       window.addEventListener("scroll", syncBelowFoldVisibility, { passive: true });
@@ -364,6 +423,8 @@ export default function Home() {
       return () => {
         window.removeEventListener("resize", syncLayout);
         window.removeEventListener("scroll", syncBelowFoldVisibility);
+        scrollIndicatorRevealDelay?.kill();
+        scrollIndicatorTween.kill();
         belowFoldTimeline.kill();
 
         cards.forEach((card) => {
@@ -493,6 +554,11 @@ export default function Home() {
             construction, economic and transportation centre. Ongoing
             construction.
           </p>
+        </div>
+        <div className="scroll-indicator" aria-hidden="true">
+          <span className="scroll-indicator-line">
+            <span className="scroll-indicator-dot" />
+          </span>
         </div>
       </section>
 

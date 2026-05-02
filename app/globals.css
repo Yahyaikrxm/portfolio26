@@ -199,6 +199,7 @@ a:focus-visible .roll-text-hover .roll-track {
 }
 
 .hero-section {
+  position: relative;
   display: flex;
   align-items: center;
   min-height: calc(100svh - 56px);
@@ -278,6 +279,44 @@ a:focus-visible .roll-text-hover .roll-track {
   width: 100%;
   margin-top: 8px;
   padding-bottom: 0;
+}
+
+.scroll-indicator {
+  position: absolute;
+  bottom: clamp(86px, 12.5svh, 148px);
+  left: calc(50% - 18px);
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  width: 36px;
+  height: 42px;
+  pointer-events: none;
+}
+
+.scroll-indicator-line {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  border-radius: 999px;
+  background: transparent;
+}
+
+.scroll-indicator-dot {
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  margin-left: -6px;
+  display: block;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.18),
+    0 0 18px rgba(255, 255, 255, 0.42),
+    0 10px 24px rgba(0, 0, 0, 0.34);
 }
 
 .content-section {
@@ -787,6 +826,19 @@ a:focus-visible .roll-text-hover .roll-track {
     min-height: calc(100svh - 40px);
     padding-top: 0;
     padding-bottom: 22px;
+  }
+
+  .scroll-indicator {
+    bottom: clamp(66px, 11svh, 104px);
+    left: calc(50% - 16px);
+    width: 32px;
+    height: 38px;
+  }
+
+  .scroll-indicator-dot {
+    width: 10px;
+    height: 10px;
+    margin-left: -5px;
   }
 
   .hero-title {

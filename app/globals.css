@@ -325,6 +325,7 @@ a:focus-visible .roll-text-hover .roll-track {
   z-index: 9001;
   width: clamp(112px, 13vw, 154px);
   height: clamp(112px, 13vw, 154px);
+  pointer-events: none;
   user-select: none;
   will-change: transform;
 }
@@ -512,7 +513,11 @@ a:focus-visible .roll-text-hover .roll-track {
   padding: 0;
   overflow: visible;
   background: transparent;
+  border: 0;
+  outline: 0;
   cursor: grab;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .essential-card-inner:active {
@@ -529,9 +534,11 @@ a:focus-visible .roll-text-hover .roll-track {
     drop-shadow(0 13px 20px rgba(0, 0, 0, 0.34))
     drop-shadow(0 26px 32px rgba(0, 0, 0, 0.2))
   );
+  outline: 0;
   pointer-events: none;
   transform: rotate(var(--image-rotation, 0deg));
   user-select: none;
+  -webkit-user-drag: none;
 }
 
 @media (max-width: 1000px) {

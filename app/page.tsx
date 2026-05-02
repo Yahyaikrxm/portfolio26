@@ -145,9 +145,10 @@ export default function Home() {
 
         const rootStyles = window.getComputedStyle(document.documentElement);
         const rootFontSize = Number.parseFloat(rootStyles.fontSize) || 16;
-        const minGap = window.innerWidth <= 640 ? 40 : 30;
-        const idealGap = window.innerWidth <= 640 ? window.innerHeight * 0.05 : window.innerHeight * 0.04;
-        const maxGap = window.innerWidth <= 640 ? rootFontSize * 3.25 : rootFontSize * 2.75;
+        const isSmallScreen = window.innerWidth <= 600;
+        const minGap = isSmallScreen ? 48 : 58;
+        const idealGap = window.innerHeight * (isSmallScreen ? 0.058 : 0.072);
+        const maxGap = rootFontSize * (isSmallScreen ? 3.75 : 5);
         const gap = Math.min(Math.max(idealGap, minGap), maxGap);
         const currentProjectMargin =
           Number.parseFloat(window.getComputedStyle(projectSection).marginTop) || 0;

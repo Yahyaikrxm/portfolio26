@@ -4,32 +4,69 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import Draggable from "gsap/Draggable";
 import ScrollTrigger from "gsap/ScrollTrigger";
+import Image from "next/image";
 import { motion } from "motion/react";
 
 const essentials = [
   {
+    label: "MacBook",
+    description: "The main workspace for builds, research, writing, and edits.",
+    image: "/essentials/ESEIMG-MACBOOK.png",
+  },
+  {
+    label: "Folder",
+    description: "Saved references, drafts, assets, and ideas before they become finished work.",
+    image: "/essentials/ESEIMG-FOLDER.png",
+  },
+  {
+    label: "Headphones",
+    description: "Focus mode for deep work, long edits, and late-night project sessions.",
+    image: "/essentials/ESEIMG-HEADPHONE.png",
+  },
+  {
+    label: "Figma",
+    description: "A place for layouts, interface experiments, and visual direction.",
+    image: "/essentials/ESEIMG-FIGMA.png",
+  },
+  {
+    label: "Notion",
+    description: "Notes, plans, task lists, and the structure behind the work.",
+    image: "/essentials/ESEIMG-NOTION.png",
+  },
+  {
     label: "Notebook",
-    description: "Loose sketches, project notes, and the first version of ideas before they turn real.",
+    description: "Sketches, project notes, and rough thinking before ideas turn real.",
+    image: "/essentials/ESEIMG-NOTEBOOK.png",
   },
   {
-    label: "Match Day",
-    description: "The soccer rhythm: pressure, teamwork, and the energy that keeps Footy4Hope moving.",
+    label: "Pen",
+    description: "Quick annotations, page margins, and the first version of most ideas.",
+    image: "/essentials/ESEIMG-PEN.png",
   },
   {
-    label: "Studio",
-    description: "A small workspace for design experiments, code sessions, and visual direction.",
+    label: "Calculator",
+    description: "Numbers, problem solving, and the practical side of engineering work.",
+    image: "/essentials/ESEIMG-CALCULATOR.png",
   },
   {
-    label: "Playlist",
-    description: "The background layer for long builds, late edits, and staying locked in.",
+    label: "Hoodie",
+    description: "The everyday layer for school, projects, and moving between worlds.",
+    image: "/essentials/ESEIMG-HOODIE.png",
   },
   {
-    label: "Camera Roll",
-    description: "Snapshots, references, and moments that shape the feeling of the collage.",
+    label: "Wallet",
+    description: "The small everyday carry that follows every routine.",
+    image: "/essentials/ESEIMG-WALLET.png",
   },
   {
-    label: "Archive",
-    description: "Old versions, saved fragments, and proof that every polished thing had drafts.",
+    label: "Camera",
+    description: "Snapshots, references, and moments that shape the visual language.",
+    image: "/essentials/ESEIMG-CAMEREA.png",
+  },
+  {
+    label: "Controller",
+    description: "A reset button for competition, rhythm, and a little downtime.",
+    image: "/essentials/ESEIMG-CONTROLLER.png",
   },
 ];
 
@@ -59,27 +96,12 @@ function RollingText({ children }: { children: string }) {
   );
 }
 
-function LoadRollingText({ children }: { children: string }) {
-  return (
-    <span className="roll-text" aria-label={children}>
-      <motion.span
-        className="roll-track"
-        aria-hidden="true"
-        initial={{ y: "0%" }}
-        animate={{ y: "-50%" }}
-        transition={{ duration: 0.95, delay: 0.58, ease: [0.16, 1, 0.3, 1] }}
-      >
-        <span>{children}</span>
-        <span>{children}</span>
-      </motion.span>
-    </span>
-  );
-}
-
 export default function Home() {
   const pageRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const navPillRef = useRef<HTMLSpanElement>(null);
+  const heroGroupRef = useRef<HTMLDivElement>(null);
+  const projectSectionRef = useRef<HTMLElement>(null);
   const essentialsRef = useRef<HTMLDivElement>(null);
   const tileRefs = useRef<Array<HTMLDivElement | null>>([]);
 
@@ -88,13 +110,66 @@ export default function Home() {
 
     const ctx = gsap.context(() => {
       const navLinks = gsap.utils.toArray<HTMLElement>(".portfolio-nav a");
+      const getSectionWidth = () => {
+        const page = pageRef.current;
 
-      gsap.set(".reveal", {
+        if (!page) {
+          return Math.min(window.innerWidth - 48, 812);
+        }
+
+        const pageRect = page.getBoundingClientRect();
+        const pageStyles = window.getComputedStyle(page);
+        const inlinePadding =
+          Number.parseFloat(pageStyles.paddingLeft) +
+          Number.parseFloat(pageStyles.paddingRight);
+
+        return Math.max(36, (pageRect.width - inlinePadding) * 0.94);
+      };
+
+      const cards = tileRefs.current.filter(Boolean) as HTMLDivElement[];
+      const heroReveals = gsap.utils.toArray<HTMLElement>(
+        ".hero-group > .reveal",
+      );
+      const scrollReveals = gsap.utils.toArray<HTMLElement>(
+        ".project-section .reveal, .site-footer.reveal",
+      );
+      const sectionRules = gsap.utils.toArray<HTMLElement>(".section-rule");
+
+      const syncProjectSpacing = () => {
+        const heroGroup = heroGroupRef.current;
+        const projectSection = projectSectionRef.current;
+
+        if (!heroGroup || !projectSection) {
+          return;
+        }
+
+        const rootStyles = window.getComputedStyle(document.documentElement);
+        const rootFontSize = Number.parseFloat(rootStyles.fontSize) || 16;
+        const minGap = window.innerWidth <= 640 ? 40 : 30;
+        const idealGap = window.innerWidth <= 640 ? window.innerHeight * 0.05 : window.innerHeight * 0.04;
+        const maxGap = window.innerWidth <= 640 ? rootFontSize * 3.25 : rootFontSize * 2.75;
+        const gap = Math.min(Math.max(idealGap, minGap), maxGap);
+        const currentProjectMargin =
+          Number.parseFloat(window.getComputedStyle(projectSection).marginTop) || 0;
+        const heroBottom = heroGroup.getBoundingClientRect().bottom + window.scrollY;
+        const projectTop = projectSection.getBoundingClientRect().top + window.scrollY;
+        const projectBaseTop = projectTop - currentProjectMargin;
+
+        projectSection.style.marginTop = `${heroBottom + gap - projectBaseTop}px`;
+      };
+
+      gsap.set([...heroReveals, ...scrollReveals], {
         autoAlpha: 0,
         y: 20,
         filter: "blur(8px)",
       });
-      gsap.set(".section-rule", { scaleX: 0, transformOrigin: "left center" });
+      gsap.set(cards, {
+        autoAlpha: 0,
+        y: 26,
+        scale: 0.9,
+        filter: "blur(6px)",
+      });
+      gsap.set(sectionRules, { scaleX: 0, transformOrigin: "left center" });
       gsap.set(navPillRef.current, { autoAlpha: 0, scale: 0.92 });
       gsap.set(navRef.current, {
         autoAlpha: 0,
@@ -124,7 +199,7 @@ export default function Home() {
           ease: "none",
         })
         .to(navRef.current, {
-          width: () => Math.min(window.innerWidth - 48, 812),
+          width: getSectionWidth,
           duration: 0.42,
           ease: "expo.out",
         })
@@ -141,15 +216,33 @@ export default function Home() {
         );
 
       ScrollTrigger.create({
-        trigger: pageRef.current,
-        start: "top -90px",
-        onEnter: () => navRevealTimeline.play(),
+        trigger: ".project-section",
+        start: "top 70%",
+        onEnter: () => {
+          if (window.scrollY > 8) {
+            navRevealTimeline.play();
+          }
+        },
         onLeaveBack: () => navRevealTimeline.reverse(),
       });
 
+      const syncNavWidth = () => {
+        if (navRevealTimeline.progress() > 0 && navRef.current) {
+          gsap.set(navRef.current, { width: getSectionWidth() });
+        }
+      };
+
+      const syncLayout = () => {
+        syncNavWidth();
+        syncProjectSpacing();
+        ScrollTrigger.refresh();
+      };
+
+      window.addEventListener("resize", syncLayout);
+
       gsap
         .timeline({ defaults: { ease: "power3.out" } })
-        .to(".reveal", {
+        .to(heroReveals, {
           autoAlpha: 1,
           y: 0,
           filter: "blur(0px)",
@@ -157,25 +250,85 @@ export default function Home() {
           stagger: 0.075,
         })
         .to(
-          ".section-rule",
+          cards,
+          {
+            autoAlpha: 1,
+            y: 0,
+            scale: 1,
+            filter: "blur(0px)",
+            duration: 0.56,
+            stagger: { each: 0.038, from: "center" },
+            ease: "back.out(1.35)",
+            clearProps: "filter",
+          },
+          "-=0.48",
+        )
+        .call(() => {
+          syncProjectSpacing();
+          ScrollTrigger.refresh();
+        });
+
+      const belowFoldTimeline = gsap.timeline({
+        paused: true,
+        defaults: { ease: "power3.out" },
+      });
+
+      belowFoldTimeline
+        .to(scrollReveals, {
+          autoAlpha: 1,
+          y: 0,
+          filter: "blur(0px)",
+          duration: 0.82,
+          stagger: 0.055,
+        })
+        .to(
+          sectionRules,
           {
             scaleX: 1,
-            duration: 1.1,
+            duration: 1,
             stagger: 0.18,
           },
-          "-=0.8",
+          "-=0.72",
         );
 
-      const cards = tileRefs.current.filter(Boolean) as HTMLDivElement[];
-      let activeCardZ = 9001;
+      const syncBelowFoldVisibility = () => {
+        if (window.scrollY > 8) {
+          belowFoldTimeline.timeScale(1);
+          belowFoldTimeline.play();
+          return;
+        }
+
+        belowFoldTimeline.timeScale(1.6).reverse();
+        navRevealTimeline.reverse();
+      };
+
+      window.addEventListener("scroll", syncBelowFoldVisibility, { passive: true });
+      syncProjectSpacing();
+      syncBelowFoldVisibility();
+
+      const initialCardZ = new Map<HTMLDivElement, number>();
+      const maxInitialCardZ = cards.reduce((maxZ, card) => {
+        const zIndex = Number.parseInt(window.getComputedStyle(card).zIndex, 10);
+        const safeZIndex = Number.isFinite(zIndex) ? zIndex : 9001;
+
+        initialCardZ.set(card, safeZIndex);
+
+        return Math.max(maxZ, safeZIndex);
+      }, 9001);
+      const activeCardZ = Math.min(maxInitialCardZ + 1, 9900);
       const liftCard = (card: HTMLDivElement) => {
-        activeCardZ = Math.min(activeCardZ + 1, 9900);
         gsap.set(card, { zIndex: activeCardZ });
+      };
+      const resetCard = (card: HTMLDivElement) => {
+        gsap.set(card, { zIndex: initialCardZ.get(card) ?? 9001 });
       };
       const hoverCard = (event: MouseEvent) => {
         const card = event.currentTarget as HTMLDivElement;
 
         liftCard(card);
+      };
+      const leaveCard = (event: MouseEvent) => {
+        resetCard(event.currentTarget as HTMLDivElement);
       };
       const pressCard = (event: MouseEvent) => {
         liftCard(event.currentTarget as HTMLDivElement);
@@ -184,6 +337,7 @@ export default function Home() {
       cards.forEach((card) => {
         card.addEventListener("mousedown", pressCard);
         card.addEventListener("mouseenter", hoverCard);
+        card.addEventListener("mouseleave", leaveCard);
       });
 
       Draggable.create(cards, {
@@ -197,12 +351,24 @@ export default function Home() {
         onPress() {
           liftCard(this.target as HTMLDivElement);
         },
+        onRelease() {
+          const card = this.target as HTMLDivElement;
+
+          if (!card.matches(":hover")) {
+            resetCard(card);
+          }
+        },
       });
 
       return () => {
+        window.removeEventListener("resize", syncLayout);
+        window.removeEventListener("scroll", syncBelowFoldVisibility);
+        belowFoldTimeline.kill();
+
         cards.forEach((card) => {
           card.removeEventListener("mousedown", pressCard);
           card.removeEventListener("mouseenter", hoverCard);
+          card.removeEventListener("mouseleave", leaveCard);
         });
       };
     }, pageRef);
@@ -281,13 +447,43 @@ export default function Home() {
       </nav>
 
       <section id="home" className="hero-section">
-        <div className="hero-grid">
+        <div ref={heroGroupRef} className="hero-grid hero-group">
+          <div ref={essentialsRef} className="essentials-board reveal" aria-label="My essentials">
+            <div className="essentials-collage">
+              {essentials.map((item, index) => (
+                <div
+                  ref={(node) => {
+                    tileRefs.current[index] = node;
+                  }}
+                  className={`essential-card essential-card-${index + 1}`}
+                  key={item.label}
+                >
+                  <motion.div
+                    className="essential-card-inner"
+                    whileHover={{ scale: 1.035 }}
+                    whileTap={{ scale: 0.985 }}
+                    transition={{ type: "spring", stiffness: 340, damping: 26 }}
+                  >
+                    <img src={item.image} alt={item.label} />
+                  </motion.div>
+                  <p className="essential-card-tooltip">{item.description}</p>
+                </div>
+              ))}
+              <Image
+                className="mobile-collage-image"
+                src="/essentials/Collage.png"
+                alt="A composed collage of Yahya's essentials"
+                width={3862}
+                height={1803}
+                priority
+              />
+            </div>
+          </div>
+
           <div className="hero-title-row reveal">
             <h1 className="hero-title">Yahya Ikram</h1>
             <p className="hero-kicker">
-              Aspiring Engineer
-              <span className="hero-slash">/</span>
-              <span className="hero-student">High School Student</span>
+              ASPIRING ENGINEER  /  HIGH SCHOOL STUDENT
             </p>
           </div>
           <p className="hero-copy reveal">
@@ -299,41 +495,10 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="content-section essentials-section" aria-label="My essentials">
+      <section ref={projectSectionRef} id="projects" className="content-section project-section">
         <div className="section-heading reveal">
           <h2>
-            <LoadRollingText>My Essentials</LoadRollingText>
-          </h2>
-          <div className="section-rule" />
-        </div>
-
-        <div ref={essentialsRef} className="essentials-board reveal">
-          {essentials.map((item, index) => (
-            <div
-              ref={(node) => {
-                tileRefs.current[index] = node;
-              }}
-              className={`essential-card essential-card-${index + 1}`}
-              key={item.label}
-            >
-              <motion.div
-                className="essential-card-inner"
-                whileHover={{ scale: 1.035 }}
-                whileTap={{ scale: 0.985 }}
-                transition={{ type: "spring", stiffness: 340, damping: 26 }}
-              >
-                <span>{item.label}</span>
-              </motion.div>
-              <p className="essential-card-tooltip">{item.description}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section id="projects" className="content-section project-section">
-        <div className="section-heading reveal">
-          <h2>
-            <LoadRollingText>My Work/Initiatives</LoadRollingText>
+            My Work/Initiatives
           </h2>
           <div className="section-rule" />
         </div>

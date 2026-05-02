@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import Draggable from "gsap/Draggable";
 import ScrollTrigger from "gsap/ScrollTrigger";
@@ -85,6 +85,8 @@ const navItems = [
   { href: "#contact", label: "Contact" },
 ];
 
+const themeStorageKey = "portfolio-theme";
+
 function RollingText({ children }: { children: string }) {
   return (
     <span className="roll-text roll-text-hover" aria-label={children}>
@@ -97,6 +99,7 @@ function RollingText({ children }: { children: string }) {
 }
 
 export default function Home() {
+  const [isLightMode, setIsLightMode] = useState(false);
   const pageRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const navPillRef = useRef<HTMLSpanElement>(null);
@@ -438,6 +441,14 @@ export default function Home() {
     return () => ctx.revert();
   }, []);
 
+  useEffect(() => {
+    const savedTheme = window.localStorage.getItem(themeStorageKey);
+    const nextIsLightMode = savedTheme === "light";
+
+    setIsLightMode(nextIsLightMode);
+    document.documentElement.dataset.theme = nextIsLightMode ? "light" : "dark";
+  }, []);
+
   const moveNavPill = (target: HTMLAnchorElement) => {
     const nav = navRef.current;
     const pill = navPillRef.current;
@@ -480,8 +491,30 @@ export default function Home() {
     });
   };
 
+  const toggleTheme = () => {
+    const nextIsLightMode = !isLightMode;
+    const nextTheme = nextIsLightMode ? "light" : "dark";
+
+    setIsLightMode(nextIsLightMode);
+    document.documentElement.dataset.theme = nextTheme;
+    window.localStorage.setItem(themeStorageKey, nextTheme);
+  };
+
   return (
     <main ref={pageRef} className="portfolio-shell">
+      <button
+        className="theme-toggle"
+        type="button"
+        aria-label={isLightMode ? "Switch to dark mode" : "Switch to light mode"}
+        aria-pressed={isLightMode}
+        onClick={toggleTheme}
+      >
+        <span className="theme-toggle-track" aria-hidden="true">
+          <span className="theme-toggle-thumb" />
+        </span>
+        <span className="theme-toggle-label">{isLightMode ? "Light" : "Dark"}</span>
+      </button>
+
       <nav
         ref={navRef}
         className="portfolio-nav"
